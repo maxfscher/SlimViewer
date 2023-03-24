@@ -12,7 +12,7 @@ from kaapana.operators.LocalWorkflowCleanerOperator import LocalWorkflowCleanerO
 from wsi.LocalWSI2DCMOperator import LocalWSI2DCMOperator
 
 
-
+#DCM-conv
 
 log = LoggingMixin().log
 
