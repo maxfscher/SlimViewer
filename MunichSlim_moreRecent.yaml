@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slim-service
+  namespace: store
+spec:
+  selector:
+    app-name: slim
+  ports:
+    - name: slim-http
+      port: 80
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: slim-ingress
+  namespace: store
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: kube-system-errorpages@kubernetescrd
+    kubernetes.io/ingress.global-static-ip-name: "kubernetes-ingress"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /slim
+        pathType: Prefix
+        backend:
+          service:
+            name: slim-service
+            port:
+              name: slim-http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slim
+  namespace: store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-name: slim
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app-name: slim
+    spec:
+      containers:
+      - name: slim-container
+        image: registry.hzdr.de/maximilian.fischer/kaapana_branchupdate/slim:0.4.2
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+      imagePullSecrets:
+        - name: registry-secret
